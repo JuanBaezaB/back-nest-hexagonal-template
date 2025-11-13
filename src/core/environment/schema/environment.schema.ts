@@ -13,4 +13,9 @@ export const environmentSchema = Joi.object<Environment, true>({
   DATABASE_PASSWORD: Joi.string().required(),
   DATABASE_NAME: Joi.string().required(),
   DATABASE_SCHEMA: Joi.string().required(),
+  JWT_SECRET: Joi.string().required(),
+  JWT_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_SECRET: Joi.string().required(),
+  JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
+  JWT_ISSUER: Joi.string().required(),
 });

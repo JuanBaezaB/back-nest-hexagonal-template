@@ -8,6 +8,7 @@ export class UserMapper {
       id: ormEntity.id,
       email: ormEntity.email,
       name: ormEntity.name,
+      password: ormEntity.password,
       createdAt: ormEntity.createdAt,
     });
   }
@@ -17,6 +18,7 @@ export class UserMapper {
     if (domainEntity.id) ormEntity.id = domainEntity.id;
     if (domainEntity.email) ormEntity.email = domainEntity.email;
     if (domainEntity.name) ormEntity.name = domainEntity.name;
+    if (domainEntity.password) ormEntity.password = domainEntity.password;
     if (domainEntity.createdAt) ormEntity.createdAt = domainEntity.createdAt;
     return ormEntity;
   }

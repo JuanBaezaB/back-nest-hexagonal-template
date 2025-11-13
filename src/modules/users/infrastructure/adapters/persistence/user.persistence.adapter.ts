@@ -24,6 +24,11 @@ export class UserPersistenceAdapter implements UserRepositoryPort {
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 
+  async findOneByEmail(email: string): Promise<User | null> {
+    const ormEntity = await this.userOrmRepository.findOneBy({ email });
+    return ormEntity ? UserMapper.toDomain(ormEntity) : null;
+  }
+
   async findAll(): Promise<User[]> {
     const ormEntities = await this.userOrmRepository.find();
     return ormEntities.map((user) => UserMapper.toDomain(user));
