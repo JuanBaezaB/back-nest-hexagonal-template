@@ -10,29 +10,35 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { UsersService } from '../../application/use-cases/users.service';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserDto } from '../../application/ports/in/create-user.dto';
 import { UpdateUserDto } from '../../application/ports/in/update-user.dto';
+import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
+import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
+import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
+import { GetAllUsersQuery } from '../../application/queries/impl/get-all-users.query';
+import { GetUserByIdQuery } from '../../application/queries/impl/get-user-by-id.query';
 
-// Este es el ADAPTADOR DE ENTRADA (HTTP)
 @Controller('users')
 export class UsersController {
-  // El controlador depende del Use Case (UsersService)
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+    return this.commandBus.execute(new CreateUserCommand(createUserDto));
   }
 
   @Get()
   getAllUsers() {
-    return this.usersService.getAllUsers();
+    return this.queryBus.execute(new GetAllUsersQuery());
   }
 
   @Get(':id')
   getUserById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.getUserById(id);
+    return this.queryBus.execute(new GetUserByIdQuery(id));
   }
 
   @Patch(':id')
@@ -40,12 +46,12 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(id, updateUserDto);
+    return this.commandBus.execute(new UpdateUserCommand(id, updateUserDto));
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteUser(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.deleteUser(id);
+    return this.commandBus.execute(new DeleteUserCommand(id));
   }
 }

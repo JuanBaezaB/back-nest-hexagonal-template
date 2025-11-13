@@ -14,7 +14,7 @@ import { EnvEnum } from '../environment/enum/env.enum';
         password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
         database: environmentService.get(EnvEnum.DATABASE_NAME),
         schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
-        eepConnectionAlive: true,
+        keepConnectionAlive: true,
         autoLoadEntities: true,
         ssl: true,
         synchronize: environmentService.isDev(),
