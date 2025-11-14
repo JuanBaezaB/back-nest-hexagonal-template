@@ -1,16 +1,16 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
-import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
-import { RefreshTokenCommand } from '../impl/refresh-token.command';
 import { Inject, UnauthorizedException } from '@nestjs/common';
-import { randomBytes, randomUUID } from 'node:crypto';
-import { EnvironmentService } from 'src/core/environment/environment.service';
-import { EnvEnum } from 'src/core/environment/enum/env.enum';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { StringValue } from 'ms';
 import ms from 'ms';
-import { TokenPort } from '../../ports/out/token.port';
-import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
+import { randomBytes } from 'node:crypto';
+import { EnvEnum } from 'src/core/environment/enum/env.enum';
+import { EnvironmentService } from 'src/core/environment/environment.service';
 import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
+import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
+import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
+import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
+import { TokenPort } from '../../ports/out/token.port';
+import { RefreshTokenCommand } from '../impl/refresh-token.command';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler
@@ -62,7 +62,7 @@ export class RefreshTokenHandler
 
     const newAccessToken = this.tokenPort.sign({ sub: userId });
 
-    const newSelector = randomUUID();
+    const newSelector = this.uuidPort.generate();
     const newValidator = randomBytes(32).toString('hex');
     const newValidatorHash = await this.hashingPort.hash(newValidator);
 
