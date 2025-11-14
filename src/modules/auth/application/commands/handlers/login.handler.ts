@@ -1,8 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
 import { LoginCommand } from '../impl/login.command';
-import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import type { StringValue } from 'ms';
@@ -11,12 +10,12 @@ import { TokenPort } from '../../ports/out/token.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
 import { AuthConfigPort } from '../../ports/out/auth-config.port';
+import { GetUserByEmailQuery } from 'src/modules/users/application/queries/impl/get-user-by-email.query';
+import { User } from 'src/modules/users/domain/entities/user.entity';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
-    @Inject(UserRepositoryPort)
-    private readonly userRepository: UserRepositoryPort,
     @Inject(RefreshTokenRepositoryPort)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
     @Inject(HashingPort)
@@ -27,12 +26,16 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly uuidPort: UuidPort,
     @Inject(AuthConfigPort)
     private readonly authConfigPort: AuthConfigPort,
+    private readonly queryBus: QueryBus,
   ) {}
 
   async execute(command: LoginCommand) {
     const { email, password } = command.loginDto;
 
-    const user = await this.userRepository.findOneByEmail(email);
+    const user = await this.queryBus.execute<GetUserByEmailQuery, User | null>(
+      new GetUserByEmailQuery(email),
+    );
+
     if (!user) throw new UnauthorizedException('Credenciales inválidas');
 
     const isMatch =

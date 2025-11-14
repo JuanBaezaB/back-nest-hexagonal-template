@@ -9,7 +9,6 @@ import { RefreshTokenTypeOrmEntity } from './infrastucture/adapters/persistence/
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
-import { UsersModule } from '../users/users.module';
 import { StringValue } from 'ms';
 import { TokenPort } from './application/ports/out/token.port';
 import { AuthConfigPort } from './application/ports/out/auth-config.port';
@@ -27,7 +26,6 @@ export const AuthConfigProvider = {
 
 @Module({
   imports: [
-    UsersModule,
     CqrsModule,
     TypeOrmModule.forFeature([RefreshTokenTypeOrmEntity]),
     JwtModule.registerAsync({
