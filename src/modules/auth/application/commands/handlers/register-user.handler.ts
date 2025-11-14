@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, ConflictException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { HashingService } from 'src/core/services/hashing.service';
 import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { User } from 'src/modules/users/domain/entities/user.entity';
@@ -26,17 +25,13 @@ export class RegisterUserHandler
 
     const hashedPassword = await this.hashingService.hash(password);
 
-    const newUser = new User({
-      id: randomUUID(),
+    const newUser = User.create({
       email,
       name,
       password: hashedPassword,
-      createdAt: new Date(),
     });
 
     const savedUser = await this.userRepository.save(newUser);
-
-    delete savedUser.password;
     return savedUser;
   }
 }

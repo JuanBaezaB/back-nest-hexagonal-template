@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 
 @Entity('refresh_tokens')
 export class RefreshTokenTypeOrmEntity {
@@ -6,12 +12,14 @@ export class RefreshTokenTypeOrmEntity {
   id: string;
 
   @Column({ name: 'user_id' })
+  @Index('index_refresh_token_user_id')
   userId: string;
 
   @Column({ unique: true })
+  @Index('index_refresh_token_selector')
   selector: string;
 
-  @Column({ name: 'token_hash' })
+  @Column({ name: 'validator_hash' })
   validatorHash: string;
 
   @Column({ name: 'is_revoked', default: false })

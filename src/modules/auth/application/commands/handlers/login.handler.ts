@@ -49,14 +49,11 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const expiresInMs = ms(expiresInString as StringValue);
     const expiresAt = new Date(Date.now() + expiresInMs);
 
-    const tokenEntity = new RefreshToken({
-      id: randomUUID(),
+    const tokenEntity = RefreshToken.create({
       userId: user.id,
       selector: selector,
       validatorHash: validatorHash,
-      isRevoked: false,
       expiresAt: expiresAt,
-      createdAt: new Date(),
     });
     await this.refreshTokenRepo.save(tokenEntity);
 

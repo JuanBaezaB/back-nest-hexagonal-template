@@ -4,7 +4,7 @@ import { UserTypeOrmEntity } from '../persistence/user.typeorm.entity';
 // Clase estática para mapear entre el dominio y la persistencia
 export class UserMapper {
   public static toDomain(ormEntity: UserTypeOrmEntity): User {
-    return new User({
+    return User.fromPersistence({
       id: ormEntity.id,
       email: ormEntity.email,
       name: ormEntity.name,

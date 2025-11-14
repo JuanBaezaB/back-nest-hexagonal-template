@@ -67,14 +67,11 @@ export class RefreshTokenHandler
     const expiresInMs = ms(expiresInString as StringValue);
     const expiresAt = new Date(Date.now() + expiresInMs);
 
-    const newTokenEntity = new RefreshToken({
-      id: randomUUID(),
+    const newTokenEntity = RefreshToken.create({
       userId: userId,
       selector: newSelector,
       validatorHash: newValidatorHash,
-      isRevoked: false,
       expiresAt: expiresAt,
-      createdAt: new Date(),
     });
 
     await this.refreshTokenRepo.save(newTokenEntity);

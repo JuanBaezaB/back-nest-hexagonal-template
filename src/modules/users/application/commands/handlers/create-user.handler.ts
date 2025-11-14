@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { User } from '../../../../users/domain/entities/user.entity';
 import { UserRepositoryPort } from '../../ports/out/user.repository.port';
 import { CreateUserCommand } from '../impl/create-user.command';
@@ -14,10 +13,9 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
   async execute(command: CreateUserCommand): Promise<User> {
     const { createUserDto } = command;
-    const newUser = new User({
-      id: randomUUID(),
-      ...createUserDto,
-      createdAt: new Date(),
+    const newUser = User.create({
+      email: createUserDto.email,
+      name: createUserDto.name,
     });
     return this.userRepository.save(newUser);
   }

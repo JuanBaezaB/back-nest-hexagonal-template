@@ -3,7 +3,7 @@ import { RefreshTokenTypeOrmEntity } from '../persistence/refresh-token.typeorm.
 
 export class RefreshTokenMapper {
   public static toDomain(ormEntity: RefreshTokenTypeOrmEntity): RefreshToken {
-    return new RefreshToken({
+    return RefreshToken.fromPersistence({
       id: ormEntity.id,
       userId: ormEntity.userId,
       selector: ormEntity.selector,
