@@ -1,4 +1,3 @@
-import { isEmail } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 
 export class User {
@@ -27,7 +26,7 @@ export class User {
     name: string;
     password?: string;
   }): User {
-    if (!props.email || !isEmail(props.email)) {
+    if (!props.email) {
       throw new Error('Invalid email');
     }
 
@@ -39,7 +38,7 @@ export class User {
       id: randomUUID(),
       email: props.email,
       name: props.name.trim(),
-      password: props.password, // <-- ¡¡CORRECCIÓN DEL BUG!!
+      password: props.password,
       createdAt: new Date(),
     });
   }
