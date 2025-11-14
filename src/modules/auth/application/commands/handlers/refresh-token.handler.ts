@@ -6,7 +6,10 @@ import { JwtService } from '@nestjs/jwt';
 import { HashingService } from 'src/core/services/hashing.service';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { JwtPayload } from '../../types/jwt-payload.type';
+import { EnvironmentService } from 'src/core/environment/environment.service';
+import { EnvEnum } from 'src/core/environment/enum/env.enum';
+import type { StringValue } from 'ms';
+import ms from 'ms';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler
@@ -17,46 +20,60 @@ export class RefreshTokenHandler
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
     private readonly jwtService: JwtService,
     private readonly hashingService: HashingService,
+    private readonly environmentService: EnvironmentService,
   ) {}
 
   async execute(command: RefreshTokenCommand) {
-    const { refreshToken, accessToken } = command.refreshTokenDto;
+    const { refreshToken } = command.refreshTokenDto;
 
-    const { sub: userId }: JwtPayload = this.jwtService.decode(accessToken);
-
-    const storedTokens =
-      await this.refreshTokenRepo.findActiveTokensByUserId(userId);
-
-    let matchedToken: RefreshToken | null = null;
-
-    for (const token of storedTokens) {
-      const isMatch = await this.hashingService.compare(
-        refreshToken,
-        token.tokenHash,
-      );
-      if (isMatch) {
-        matchedToken = token;
-        break;
-      }
+    const [selector, validator] = refreshToken.split(':');
+    if (!selector || !validator) {
+      throw new UnauthorizedException('Formato de token inválido');
     }
 
-    if (!matchedToken || matchedToken.isExpired()) {
+    const storedToken =
+      await this.refreshTokenRepo.findTokenBySelector(selector);
+
+    if (!storedToken) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
+
+    if (storedToken.isRevoked || storedToken.isExpired()) {
       throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
-    await this.refreshTokenRepo.update(matchedToken.id, { isRevoked: true });
+    const isMatch = await this.hashingService.compare(
+      validator,
+      storedToken.validatorHash,
+    );
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
+
+    const userId = storedToken.userId;
+
+    await this.refreshTokenRepo.update(storedToken.id, { isRevoked: true });
 
     const newAccessToken = this.jwtService.sign({ sub: userId });
 
-    const newRefreshTokenPlain = randomBytes(32).toString('hex');
-    const newHash = await this.hashingService.hash(newRefreshTokenPlain);
+    const newSelector = randomUUID();
+    const newValidator = randomBytes(32).toString('hex');
+    const newValidatorHash = await this.hashingService.hash(newValidator);
+
+    const expiresInString = this.environmentService.get(
+      EnvEnum.JWT_REFRESH_EXPIRATION,
+    );
+    const expiresInMs = ms(expiresInString as StringValue);
+    const expiresAt = new Date(Date.now() + expiresInMs);
 
     const newTokenEntity = new RefreshToken({
       id: randomUUID(),
       userId: userId,
-      tokenHash: newHash,
+      selector: newSelector,
+      validatorHash: newValidatorHash,
       isRevoked: false,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expiresAt: expiresAt,
       createdAt: new Date(),
     });
 
@@ -64,7 +81,7 @@ export class RefreshTokenHandler
 
     return {
       accessToken: newAccessToken,
-      refreshToken: newRefreshTokenPlain,
+      refreshToken: `${newSelector}:${newValidator}`,
       user: {
         id: userId,
       },

@@ -1,7 +1,8 @@
 export class RefreshToken {
   id: string;
   userId: string;
-  tokenHash: string;
+  selector: string;
+  validatorHash: string;
   isRevoked: boolean;
   expiresAt: Date;
   createdAt: Date;

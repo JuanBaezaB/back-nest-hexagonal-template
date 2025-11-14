@@ -6,7 +6,8 @@ export class RefreshTokenMapper {
     return new RefreshToken({
       id: ormEntity.id,
       userId: ormEntity.userId,
-      tokenHash: ormEntity.tokenHash,
+      selector: ormEntity.selector,
+      validatorHash: ormEntity.validatorHash,
       isRevoked: ormEntity.isRevoked,
       expiresAt: ormEntity.expiresAt,
       createdAt: ormEntity.createdAt,
@@ -19,7 +20,8 @@ export class RefreshTokenMapper {
     const ormEntity = new RefreshTokenTypeOrmEntity();
     ormEntity.id = domainEntity.id;
     ormEntity.userId = domainEntity.userId;
-    ormEntity.tokenHash = domainEntity.tokenHash;
+    ormEntity.selector = domainEntity.selector;
+    ormEntity.validatorHash = domainEntity.validatorHash;
     ormEntity.isRevoked = domainEntity.isRevoked;
     ormEntity.expiresAt = domainEntity.expiresAt;
     ormEntity.createdAt = domainEntity.createdAt;

@@ -8,8 +8,11 @@ export class RefreshTokenTypeOrmEntity {
   @Column({ name: 'user_id' })
   userId: string;
 
+  @Column({ unique: true })
+  selector: string;
+
   @Column({ name: 'token_hash' })
-  tokenHash: string;
+  validatorHash: string;
 
   @Column({ name: 'is_revoked', default: false })
   isRevoked: boolean;

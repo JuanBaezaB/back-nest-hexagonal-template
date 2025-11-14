@@ -11,6 +11,7 @@ import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import { UsersModule } from '../users/users.module';
 import { HashingService } from 'src/core/services/hashing.service';
+import { StringValue } from 'ms';
 
 export const RefreshTokenRepositoryProvider = {
   provide: RefreshTokenRepositoryPort,
@@ -26,8 +27,12 @@ export const RefreshTokenRepositoryProvider = {
       inject: [EnvironmentService],
       useFactory: (environmentService: EnvironmentService) => {
         return {
+          secret: environmentService.get(EnvEnum.JWT_ACCESS_SECRET),
           signOptions: {
             issuer: environmentService.get(EnvEnum.JWT_ISSUER),
+            expiresIn: environmentService.get(
+              EnvEnum.JWT_ACCESS_EXPIRATION,
+            ) as StringValue,
           },
         };
       },

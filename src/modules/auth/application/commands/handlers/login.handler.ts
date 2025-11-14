@@ -6,7 +6,11 @@ import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user
 import { HashingService } from 'src/core/services/hashing.service';
 import { JwtService } from '@nestjs/jwt';
 import { Inject, UnauthorizedException } from '@nestjs/common';
-import { randomUUID, randomBytes } from 'crypto';
+import { randomUUID, randomBytes } from 'crypto'; // <-- Asegúrate que ambos estén
+import { EnvironmentService } from 'src/core/environment/environment.service';
+import { EnvEnum } from 'src/core/environment/enum/env.enum';
+import type { StringValue } from 'ms';
+import ms from 'ms';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -17,6 +21,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
+    private readonly environmentService: EnvironmentService,
   ) {}
 
   async execute(command: LoginCommand) {
@@ -34,22 +39,30 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const payload = { sub: user.id };
     const accessToken = this.jwtService.sign(payload);
 
-    const refreshToken = randomBytes(32).toString('hex');
-    const refreshTokenHash = await this.hashingService.hash(refreshToken);
+    const selector = randomUUID();
+    const validator = randomBytes(32).toString('hex');
+    const validatorHash = await this.hashingService.hash(validator);
+
+    const expiresInString = this.environmentService.get(
+      EnvEnum.JWT_REFRESH_EXPIRATION,
+    );
+    const expiresInMs = ms(expiresInString as StringValue);
+    const expiresAt = new Date(Date.now() + expiresInMs);
 
     const tokenEntity = new RefreshToken({
       id: randomUUID(),
       userId: user.id,
-      tokenHash: refreshTokenHash,
+      selector: selector,
+      validatorHash: validatorHash,
       isRevoked: false,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expiresAt: expiresAt,
       createdAt: new Date(),
     });
     await this.refreshTokenRepo.save(tokenEntity);
 
     return {
       accessToken,
-      refreshToken,
+      refreshToken: `${selector}:${validator}`, // <-- Enviamos 'selector:validator'
       user: { id: user.id },
     };
   }
