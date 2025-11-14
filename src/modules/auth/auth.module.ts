@@ -12,10 +12,17 @@ import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import { UsersModule } from '../users/users.module';
 import { StringValue } from 'ms';
 import { TokenPort } from './application/ports/out/token.port';
+import { AuthConfigPort } from './application/ports/out/auth-config.port';
+import { AuthConfigAdapter } from './infrastucture/adapters/auth-config.adapter';
 
 export const RefreshTokenRepositoryProvider = {
   provide: RefreshTokenRepositoryPort,
   useClass: RefreshTokenPersistenceAdapter,
+};
+
+export const AuthConfigProvider = {
+  provide: AuthConfigPort,
+  useClass: AuthConfigAdapter,
 };
 
 @Module({
@@ -42,6 +49,7 @@ export const RefreshTokenRepositoryProvider = {
   providers: [
     ...CommandHandlers,
     RefreshTokenRepositoryProvider,
+    AuthConfigProvider,
     {
       provide: TokenPort,
       useExisting: JwtService,

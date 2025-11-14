@@ -5,13 +5,12 @@ import { LoginCommand } from '../impl/login.command';
 import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import { EnvironmentService } from 'src/core/environment/environment.service';
-import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import type { StringValue } from 'ms';
 import ms from 'ms';
 import { TokenPort } from '../../ports/out/token.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
+import { AuthConfigPort } from '../../ports/out/auth-config.port';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
@@ -26,7 +25,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly tokenPort: TokenPort,
     @Inject(UuidPort)
     private readonly uuidPort: UuidPort,
-    private readonly environmentService: EnvironmentService,
+    @Inject(AuthConfigPort)
+    private readonly authConfigPort: AuthConfigPort,
   ) {}
 
   async execute(command: LoginCommand) {
@@ -48,9 +48,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const validator = randomBytes(32).toString('hex');
     const validatorHash = await this.hashingPort.hash(validator);
 
-    const expiresInString = this.environmentService.get(
-      EnvEnum.JWT_REFRESH_EXPIRATION,
-    );
+    const expiresInString = this.authConfigPort.getJwtRefreshExpiration();
     const expiresInMs = ms(expiresInString as StringValue);
     const expiresAt = new Date(Date.now() + expiresInMs);
 

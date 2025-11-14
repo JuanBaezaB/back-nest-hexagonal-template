@@ -3,14 +3,13 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { StringValue } from 'ms';
 import ms from 'ms';
 import { randomBytes } from 'node:crypto';
-import { EnvEnum } from 'src/core/environment/enum/env.enum';
-import { EnvironmentService } from 'src/core/environment/environment.service';
 import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
 import { TokenPort } from '../../ports/out/token.port';
 import { RefreshTokenCommand } from '../impl/refresh-token.command';
+import { AuthConfigPort } from '../../ports/out/auth-config.port';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler
@@ -25,7 +24,8 @@ export class RefreshTokenHandler
     private readonly tokenPort: TokenPort,
     @Inject(UuidPort)
     private readonly uuidPort: UuidPort,
-    private readonly environmentService: EnvironmentService,
+    @Inject(AuthConfigPort)
+    private readonly authConfigPort: AuthConfigPort,
   ) {}
 
   async execute(command: RefreshTokenCommand) {
@@ -57,8 +57,8 @@ export class RefreshTokenHandler
     }
 
     const userId = storedToken.userId;
-
-    await this.refreshTokenRepo.update(storedToken.id, { isRevoked: true });
+    storedToken.revoke();
+    await this.refreshTokenRepo.save(storedToken);
 
     const newAccessToken = this.tokenPort.sign({ sub: userId });
 
@@ -66,9 +66,7 @@ export class RefreshTokenHandler
     const newValidator = randomBytes(32).toString('hex');
     const newValidatorHash = await this.hashingPort.hash(newValidator);
 
-    const expiresInString = this.environmentService.get(
-      EnvEnum.JWT_REFRESH_EXPIRATION,
-    );
+    const expiresInString = this.authConfigPort.getJwtRefreshExpiration();
     const expiresInMs = ms(expiresInString as StringValue);
     const expiresAt = new Date(Date.now() + expiresInMs);
 
