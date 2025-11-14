@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 export class RefreshToken {
   private readonly _id: string;
   private readonly _userId: string;
@@ -28,6 +26,7 @@ export class RefreshToken {
   }
 
   public static create(props: {
+    id: string;
     userId: string;
     selector: string;
     validatorHash: string;
@@ -35,7 +34,7 @@ export class RefreshToken {
   }): RefreshToken {
     return new RefreshToken({
       ...props,
-      id: randomUUID(),
+      id: props.id,
       isRevoked: false,
       createdAt: new Date(),
     });

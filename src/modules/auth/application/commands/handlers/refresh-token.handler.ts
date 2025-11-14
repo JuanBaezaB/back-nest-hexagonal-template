@@ -2,14 +2,15 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
 import { RefreshTokenCommand } from '../impl/refresh-token.command';
-import { JwtService } from '@nestjs/jwt';
-import { HashingService } from 'src/core/services/hashing.service';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import type { StringValue } from 'ms';
 import ms from 'ms';
+import { HashingPort } from '../../ports/out/hashing.port';
+import { TokenPort } from '../../ports/out/token.port';
+import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenHandler
@@ -18,8 +19,12 @@ export class RefreshTokenHandler
   constructor(
     @Inject(RefreshTokenRepositoryPort)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
-    private readonly jwtService: JwtService,
-    private readonly hashingService: HashingService,
+    @Inject(HashingPort)
+    private readonly hashingPort: HashingPort,
+    @Inject(TokenPort)
+    private readonly tokenPort: TokenPort,
+    @Inject(UuidPort)
+    private readonly uuidPort: UuidPort,
     private readonly environmentService: EnvironmentService,
   ) {}
 
@@ -42,7 +47,7 @@ export class RefreshTokenHandler
       throw new UnauthorizedException('Refresh token inválido o expirado');
     }
 
-    const isMatch = await this.hashingService.compare(
+    const isMatch = await this.hashingPort.compare(
       validator,
       storedToken.validatorHash,
     );
@@ -55,11 +60,11 @@ export class RefreshTokenHandler
 
     await this.refreshTokenRepo.update(storedToken.id, { isRevoked: true });
 
-    const newAccessToken = this.jwtService.sign({ sub: userId });
+    const newAccessToken = this.tokenPort.sign({ sub: userId });
 
     const newSelector = randomUUID();
     const newValidator = randomBytes(32).toString('hex');
-    const newValidatorHash = await this.hashingService.hash(newValidator);
+    const newValidatorHash = await this.hashingPort.hash(newValidator);
 
     const expiresInString = this.environmentService.get(
       EnvEnum.JWT_REFRESH_EXPIRATION,
@@ -68,6 +73,7 @@ export class RefreshTokenHandler
     const expiresAt = new Date(Date.now() + expiresInMs);
 
     const newTokenEntity = RefreshToken.create({
+      id: this.uuidPort.generate(),
       userId: userId,
       selector: newSelector,
       validatorHash: newValidatorHash,

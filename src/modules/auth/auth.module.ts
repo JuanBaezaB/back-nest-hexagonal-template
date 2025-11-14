@@ -6,12 +6,14 @@ import { RefreshTokenPersistenceAdapter } from './infrastucture/adapters/persist
 import { RefreshTokenRepositoryPort } from './application/ports/out/refresh-token.repository.port';
 import { AuthController } from './infrastucture/controllers/auth.controller';
 import { RefreshTokenTypeOrmEntity } from './infrastucture/adapters/persistence/refresh-token.typeorm.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import { UsersModule } from '../users/users.module';
 import { HashingService } from 'src/core/services/hashing.service';
 import { StringValue } from 'ms';
+import { HashingPort } from './application/ports/out/hashing.port';
+import { TokenPort } from './application/ports/out/token.port';
 
 export const RefreshTokenRepositoryProvider = {
   provide: RefreshTokenRepositoryPort,
@@ -42,7 +44,14 @@ export const RefreshTokenRepositoryProvider = {
   providers: [
     ...CommandHandlers,
     RefreshTokenRepositoryProvider,
-    HashingService,
+    {
+      provide: HashingPort,
+      useClass: HashingService,
+    },
+    {
+      provide: TokenPort,
+      useExisting: JwtService,
+    },
   ],
 })
 export class AuthModule {}

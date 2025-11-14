@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, ConflictException } from '@nestjs/common';
-import { HashingService } from 'src/core/services/hashing.service';
 import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { User } from 'src/modules/users/domain/entities/user.entity';
 import { RegisterUserCommand } from '../impl/register-user.command';
+import { HashingPort } from '../../ports/out/hashing.port';
+import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 
 @CommandHandler(RegisterUserCommand)
 export class RegisterUserHandler
@@ -12,7 +13,10 @@ export class RegisterUserHandler
   constructor(
     @Inject(UserRepositoryPort)
     private readonly userRepository: UserRepositoryPort,
-    private readonly hashingService: HashingService,
+    @Inject(HashingPort)
+    private readonly hashingPort: HashingPort,
+    @Inject(UuidPort)
+    private readonly uuidPort: UuidPort,
   ) {}
 
   async execute(command: RegisterUserCommand): Promise<User> {
@@ -23,9 +27,10 @@ export class RegisterUserHandler
       throw new ConflictException('El correo electrónico ya está en uso');
     }
 
-    const hashedPassword = await this.hashingService.hash(password);
+    const hashedPassword = await this.hashingPort.hash(password);
 
     const newUser = User.create({
+      id: this.uuidPort.generate(),
       email,
       name,
       password: hashedPassword,

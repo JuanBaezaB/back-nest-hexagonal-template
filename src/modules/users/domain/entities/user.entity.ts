@@ -1,5 +1,3 @@
-import { randomUUID } from 'node:crypto';
-
 export class User {
   private readonly _id: string;
   private _email: string;
@@ -22,6 +20,7 @@ export class User {
   }
 
   static create(props: {
+    id: string;
     email: string;
     name: string;
     password?: string;
@@ -35,7 +34,7 @@ export class User {
     }
 
     return new User({
-      id: randomUUID(),
+      id: props.id,
       email: props.email,
       name: props.name.trim(),
       password: props.password,
@@ -67,5 +66,19 @@ export class User {
   }
   get createdAt(): Date {
     return this._createdAt;
+  }
+
+  public updateName(newName: string): void {
+    if (!newName || newName.trim().length < 3) {
+      throw new Error('Invalid name');
+    }
+    this._name = newName.trim();
+  }
+
+  public updateEmail(newEmail: string): void {
+    if (!newEmail || !newEmail.includes('@')) {
+      throw new Error('Invalid email');
+    }
+    this._email = newEmail;
   }
 }
