@@ -4,7 +4,7 @@ import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
 import { LoginCommand } from '../impl/login.command';
 import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { Inject, UnauthorizedException } from '@nestjs/common';
-import { randomUUID, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import type { StringValue } from 'ms';
@@ -44,7 +44,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const payload = { sub: user.id };
     const accessToken = this.tokenPort.sign(payload);
 
-    const selector = randomUUID();
+    const selector = this.uuidPort.generate();
     const validator = randomBytes(32).toString('hex');
     const validatorHash = await this.hashingPort.hash(validator);
 
