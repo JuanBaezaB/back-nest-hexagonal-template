@@ -10,9 +10,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import { UsersModule } from '../users/users.module';
-import { HashingService } from 'src/core/services/hashing.service';
 import { StringValue } from 'ms';
-import { HashingPort } from './application/ports/out/hashing.port';
 import { TokenPort } from './application/ports/out/token.port';
 
 export const RefreshTokenRepositoryProvider = {
@@ -44,10 +42,6 @@ export const RefreshTokenRepositoryProvider = {
   providers: [
     ...CommandHandlers,
     RefreshTokenRepositoryProvider,
-    {
-      provide: HashingPort,
-      useClass: HashingService,
-    },
     {
       provide: TokenPort,
       useExisting: JwtService,

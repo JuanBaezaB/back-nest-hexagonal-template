@@ -9,9 +9,9 @@ import { EnvironmentService } from 'src/core/environment/environment.service';
 import { EnvEnum } from 'src/core/environment/enum/env.enum';
 import type { StringValue } from 'ms';
 import ms from 'ms';
-import { HashingPort } from '../../ports/out/hashing.port';
 import { TokenPort } from '../../ports/out/token.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
+import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
 
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {

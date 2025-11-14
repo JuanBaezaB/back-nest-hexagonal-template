@@ -3,8 +3,8 @@ import { Inject, ConflictException } from '@nestjs/common';
 import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { User } from 'src/modules/users/domain/entities/user.entity';
 import { RegisterUserCommand } from '../impl/register-user.command';
-import { HashingPort } from '../../ports/out/hashing.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
+import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
 
 @CommandHandler(RegisterUserCommand)
 export class RegisterUserHandler
