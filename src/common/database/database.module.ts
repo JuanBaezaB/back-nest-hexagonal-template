@@ -7,7 +7,6 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 @Module({
   imports: [
     MikroOrmModule.forRootAsync({
-      inject: [EnvironmentService],
       useFactory: (environmentService: EnvironmentService) => ({
         driver: PostgreSqlDriver,
         host: environmentService.get(EnvEnum.DATABASE_HOST),
@@ -16,10 +15,9 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
         password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
         dbName: environmentService.get(EnvEnum.DATABASE_NAME),
         schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
-        autoLoadEntities: true, // Esto descubrirá tus entidades automáticamente
-        synchronize: environmentService.isDev(), // synchronize: true es genial para desarrollo
-        logging: environmentService.isDev(),
+        autoLoadEntities: true,
         keepConnectionAlive: true,
+        debug: environmentService.isDev(),
         driverOptions: {
           connection: {
             ssl: {
@@ -29,6 +27,8 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
           },
         },
       }),
+      inject: [EnvironmentService],
+      driver: PostgreSqlDriver,
     }),
   ],
 })

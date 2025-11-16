@@ -7,6 +7,7 @@ import { LoggerService } from './common/logger/logger.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { EnvEnum } from './common/environment/enum/env.enum';
+import { MikroORM } from '@mikro-orm/postgresql';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +32,10 @@ async function bootstrap() {
   );
 
   if (environmentService.isDev()) {
+    const orm = app.get(MikroORM);
+    const generator = orm.getSchemaGenerator();
+    await generator.updateSchema();
+
     const options = new DocumentBuilder()
       .setTitle('API Documentation')
       .setDescription('API documentation for the application')
