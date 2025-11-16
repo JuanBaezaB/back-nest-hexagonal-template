@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { UserRepositoryPort } from '../../../application/ports/out/user.repository.port';
 import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { Injectable } from '@nestjs/common';
+import { User } from 'src/modules/users/domain/entities/user.entity';
+import { UserRepositoryPort } from '../../../application/ports/out/user.repository.port';
 import { UserMapper } from '../mappers/user.mapper';
 import { UserMikroOrmEntity } from './user.mikroorm.entity';
-import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
-import { User } from 'src/modules/users/domain/entities/user.entity';
 
 @Injectable()
 export class UserPersistenceAdapter implements UserRepositoryPort {
@@ -22,11 +22,6 @@ export class UserPersistenceAdapter implements UserRepositoryPort {
 
   async findOneById(id: string): Promise<User | null> {
     const ormEntity = await this.userOrmRepository.findOne({ id });
-    return ormEntity ? UserMapper.toDomain(ormEntity) : null;
-  }
-
-  async findOneByEmail(email: string): Promise<User | null> {
-    const ormEntity = await this.userOrmRepository.findOne({ email });
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 

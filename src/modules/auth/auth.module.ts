@@ -1,18 +1,21 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { CommandHandlers } from './application/commands/handlers';
-import { RefreshTokenPersistenceAdapter } from './infrastucture/adapters/persistence/refresh-token.persistence.adapter';
-import { RefreshTokenRepositoryPort } from './application/ports/out/refresh-token.repository.port';
-import { AuthController } from './infrastucture/controllers/auth.controller';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { EnvironmentService } from '../../common/environment/environment.service';
-import { EnvEnum } from '../../common/environment/enum/env.enum';
 import { StringValue } from 'ms';
-import { TokenPort } from './application/ports/out/token.port';
+import { EnvEnum } from '../../common/environment/enum/env.enum';
+import { EnvironmentService } from '../../common/environment/environment.service';
+import { CommandHandlers } from './application/commands/handlers';
 import { AuthConfigPort } from './application/ports/out/auth-config.port';
+import { CredentialRepositoryPort } from './application/ports/out/credential.repository.port';
+import { RefreshTokenRepositoryPort } from './application/ports/out/refresh-token.repository.port';
+import { TokenPort } from './application/ports/out/token.port';
 import { AuthConfigAdapter } from './infrastucture/adapters/auth-config.adapter';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { CredentialMikroOrmEntity } from './infrastucture/adapters/persistence/credential.mikroorm.entity';
+import { CredentialPersistenceAdapter } from './infrastucture/adapters/persistence/credential.persistence.adapter';
 import { RefreshTokenMikroOrmEntity } from './infrastucture/adapters/persistence/refresh-token.mikroorm.entity';
+import { RefreshTokenPersistenceAdapter } from './infrastucture/adapters/persistence/refresh-token.persistence.adapter';
+import { AuthController } from './infrastucture/controllers/auth.controller';
 
 export const RefreshTokenRepositoryProvider = {
   provide: RefreshTokenRepositoryPort,
@@ -24,10 +27,18 @@ export const AuthConfigProvider = {
   useClass: AuthConfigAdapter,
 };
 
+export const CredentialRepositoryProvider = {
+  provide: CredentialRepositoryPort,
+  useClass: CredentialPersistenceAdapter,
+};
+
 @Module({
   imports: [
     CqrsModule,
-    MikroOrmModule.forFeature([RefreshTokenMikroOrmEntity]),
+    MikroOrmModule.forFeature([
+      RefreshTokenMikroOrmEntity,
+      CredentialMikroOrmEntity,
+    ]),
     JwtModule.registerAsync({
       inject: [EnvironmentService],
       useFactory: (environmentService: EnvironmentService) => {
@@ -47,6 +58,7 @@ export const AuthConfigProvider = {
   providers: [
     ...CommandHandlers,
     RefreshTokenRepositoryProvider,
+    CredentialRepositoryProvider,
     AuthConfigProvider,
     {
       provide: TokenPort,
