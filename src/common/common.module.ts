@@ -6,4 +6,4 @@ import { DatabaseModule } from './database/database.module';
 @Module({
   imports: [LoggerModule, EnvironmentModule, DatabaseModule],
 })
-export class CoreModule {}
+export class CommonModule {}

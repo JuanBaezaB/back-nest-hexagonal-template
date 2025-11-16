@@ -1,34 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
 import { RefreshTokenMapper } from '../mappers/refresh-token.mapper';
-import { RefreshTokenTypeOrmEntity } from './refresh-token.typeorm.entity';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { RefreshTokenMikroOrmEntity } from './refresh-token.mikroorm.entity';
 
 @Injectable()
 export class RefreshTokenPersistenceAdapter
   implements RefreshTokenRepositoryPort
 {
   constructor(
-    @InjectRepository(RefreshTokenTypeOrmEntity)
-    private readonly refreshTokenRepo: Repository<RefreshTokenTypeOrmEntity>,
+    @InjectRepository(RefreshTokenMikroOrmEntity)
+    private readonly refreshTokenRepo: EntityRepository<RefreshTokenMikroOrmEntity>,
+    private readonly em: EntityManager,
   ) {}
 
   async save(token: RefreshToken): Promise<RefreshToken> {
     const ormEntity = RefreshTokenMapper.toPersistence(token);
-    const savedEntity = await this.refreshTokenRepo.save(ormEntity);
-    return RefreshTokenMapper.toDomain(savedEntity);
+    await this.em.persistAndFlush(ormEntity);
+    return RefreshTokenMapper.toDomain(ormEntity);
   }
 
   async findTokenBySelector(selector: string): Promise<RefreshToken | null> {
-    const ormEntity = await this.refreshTokenRepo.findOne({
-      where: { selector },
-    });
+    const ormEntity = await this.refreshTokenRepo.findOne({ selector });
     return ormEntity ? RefreshTokenMapper.toDomain(ormEntity) : null;
   }
+
   async update(id: string, partial: Partial<RefreshToken>): Promise<boolean> {
-    const result = await this.refreshTokenRepo.update(id, partial);
-    return (result.affected ?? 0) > 0;
+    const ormEntity = await this.refreshTokenRepo.findOne({ id });
+
+    if (!ormEntity) return false;
+
+    this.em.assign(ormEntity, partial);
+
+    await this.em.flush();
+
+    return true;
   }
 }

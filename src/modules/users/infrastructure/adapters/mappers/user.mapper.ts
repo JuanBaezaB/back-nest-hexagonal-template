@@ -1,9 +1,9 @@
 import { User } from '../../../domain/entities/user.entity';
-import { UserTypeOrmEntity } from '../persistence/user.typeorm.entity';
+import { UserMikroOrmEntity } from '../persistence/user.mikroorm.entity';
 
 // Clase estática para mapear entre el dominio y la persistencia
 export class UserMapper {
-  public static toDomain(ormEntity: UserTypeOrmEntity): User {
+  public static toDomain(ormEntity: UserMikroOrmEntity): User {
     return User.fromPersistence({
       id: ormEntity.id,
       email: ormEntity.email,
@@ -13,8 +13,8 @@ export class UserMapper {
     });
   }
 
-  public static toPersistence(domainEntity: Partial<User>): UserTypeOrmEntity {
-    const ormEntity = new UserTypeOrmEntity();
+  public static toPersistence(domainEntity: Partial<User>): UserMikroOrmEntity {
+    const ormEntity = new UserMikroOrmEntity();
     if (domainEntity.id) ormEntity.id = domainEntity.id;
     if (domainEntity.email) ormEntity.email = domainEntity.email;
     if (domainEntity.name) ormEntity.name = domainEntity.name;

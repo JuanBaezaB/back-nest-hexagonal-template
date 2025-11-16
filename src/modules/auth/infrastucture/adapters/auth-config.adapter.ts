@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { EnvEnum } from 'src/core/environment/enum/env.enum';
-import { EnvironmentService } from 'src/core/environment/environment.service';
+import { EnvEnum } from '../../../../common/environment/enum/env.enum';
+import { EnvironmentService } from '../../../../common/environment/environment.service';
 import { AuthConfigPort } from '../../application/ports/out/auth-config.port';
 
 @Injectable()

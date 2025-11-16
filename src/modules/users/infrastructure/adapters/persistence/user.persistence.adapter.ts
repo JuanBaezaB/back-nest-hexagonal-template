@@ -1,48 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryPort } from '../../../application/ports/out/user.repository.port';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserTypeOrmEntity } from './user.typeorm.entity';
-import { Repository } from 'typeorm';
-import { User } from '../../../../users/domain/entities/user.entity';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { UserMapper } from '../mappers/user.mapper';
+import { UserMikroOrmEntity } from './user.mikroorm.entity';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import { User } from 'src/modules/users/domain/entities/user.entity';
 
 @Injectable()
 export class UserPersistenceAdapter implements UserRepositoryPort {
   constructor(
-    @InjectRepository(UserTypeOrmEntity)
-    private readonly userOrmRepository: Repository<UserTypeOrmEntity>,
+    @InjectRepository(UserMikroOrmEntity)
+    private readonly userOrmRepository: EntityRepository<UserMikroOrmEntity>,
+    private readonly em: EntityManager,
   ) {}
 
   async save(user: User): Promise<User> {
     const ormEntity = UserMapper.toPersistence(user);
-    const savedEntity = await this.userOrmRepository.save(ormEntity);
-    return UserMapper.toDomain(savedEntity);
+    await this.em.persistAndFlush(ormEntity);
+    return UserMapper.toDomain(ormEntity);
   }
 
   async findOneById(id: string): Promise<User | null> {
-    const ormEntity = await this.userOrmRepository.findOneBy({ id });
+    const ormEntity = await this.userOrmRepository.findOne({ id });
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    const ormEntity = await this.userOrmRepository.findOneBy({ email });
+    const ormEntity = await this.userOrmRepository.findOne({ email });
     return ormEntity ? UserMapper.toDomain(ormEntity) : null;
   }
 
   async findAll(): Promise<User[]> {
-    const ormEntities = await this.userOrmRepository.find();
+    const ormEntities = await this.userOrmRepository.findAll();
     return ormEntities.map((user) => UserMapper.toDomain(user));
   }
 
   async update(id: string, user: Partial<User>): Promise<User | null> {
-    const exists = await this.userOrmRepository.existsBy({ id });
-    if (!exists) return null;
-    await this.userOrmRepository.update(id, UserMapper.toPersistence(user));
-    return this.findOneById(id);
+    const ormEntity = await this.userOrmRepository.findOne({ id });
+    if (!ormEntity) return null;
+
+    const partial = UserMapper.toPersistence(user);
+
+    this.em.assign(ormEntity, partial);
+    await this.em.flush();
+
+    return UserMapper.toDomain(ormEntity);
   }
 
   async deleteById(id: string): Promise<boolean> {
-    const result = await this.userOrmRepository.delete(id);
-    return (result.affected ?? 0) > 0;
+    const affected = await this.em.nativeDelete(UserMikroOrmEntity, { id });
+    return affected > 0;
   }
 }

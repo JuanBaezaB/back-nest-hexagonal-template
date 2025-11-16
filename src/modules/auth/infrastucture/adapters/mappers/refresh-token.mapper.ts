@@ -1,8 +1,8 @@
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
-import { RefreshTokenTypeOrmEntity } from '../persistence/refresh-token.typeorm.entity';
+import { RefreshTokenMikroOrmEntity } from '../persistence/refresh-token.mikroorm.entity';
 
 export class RefreshTokenMapper {
-  public static toDomain(ormEntity: RefreshTokenTypeOrmEntity): RefreshToken {
+  public static toDomain(ormEntity: RefreshTokenMikroOrmEntity): RefreshToken {
     return RefreshToken.fromPersistence({
       id: ormEntity.id,
       userId: ormEntity.userId,
@@ -16,8 +16,8 @@ export class RefreshTokenMapper {
 
   public static toPersistence(
     domainEntity: RefreshToken,
-  ): RefreshTokenTypeOrmEntity {
-    const ormEntity = new RefreshTokenTypeOrmEntity();
+  ): RefreshTokenMikroOrmEntity {
+    const ormEntity = new RefreshTokenMikroOrmEntity();
     ormEntity.id = domainEntity.id;
     ormEntity.userId = domainEntity.userId;
     ormEntity.selector = domainEntity.selector;

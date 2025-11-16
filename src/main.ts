@@ -2,11 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import helmet from 'helmet';
-import { EnvironmentService } from './core/environment/environment.service';
-import { LoggerService } from './core/logger/logger.service';
-import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
+import { EnvironmentService } from './common/environment/environment.service';
+import { LoggerService } from './common/logger/logger.service';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { EnvEnum } from './core/environment/enum/env.enum';
+import { EnvEnum } from './common/environment/enum/env.enum';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
