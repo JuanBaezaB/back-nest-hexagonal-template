@@ -14,9 +14,9 @@ export class UserPersistenceAdapter implements UserRepositoryPort {
     private readonly em: EntityManager,
   ) {}
 
-  async save(user: User): Promise<User> {
+  save(user: User): User {
     const ormEntity = UserMapper.toPersistence(user);
-    await this.em.persistAndFlush(ormEntity);
+    this.em.persist(ormEntity);
     return UserMapper.toDomain(ormEntity);
   }
 

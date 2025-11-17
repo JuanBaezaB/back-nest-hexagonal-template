@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
-  Delete,
-  HttpCode,
-  HttpStatus,
+  Post,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
+import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
+import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
 import { CreateUserDto } from '../../application/ports/in/create-user.dto';
 import { UpdateUserDto } from '../../application/ports/in/update-user.dto';
-import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
-import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
-import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
 import { GetAllUsersQuery } from '../../application/queries/impl/get-all-users.query';
 import { GetUserByIdQuery } from '../../application/queries/impl/get-user-by-id.query';
 

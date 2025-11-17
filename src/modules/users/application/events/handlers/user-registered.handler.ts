@@ -21,6 +21,6 @@ export class UserRegisteredHandler
       name,
     });
 
-    return this.userRepository.save(user);
+    return Promise.resolve(this.userRepository.save(user));
   }
 }

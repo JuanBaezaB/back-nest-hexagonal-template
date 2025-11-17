@@ -1,11 +1,11 @@
 // Implementación del adaptador de persistencia para Credential
-import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
-import { Credential } from '../../../domain/entities/credential.entity';
+import { Injectable } from '@nestjs/common';
 import { CredentialRepositoryPort } from '../../../application/ports/out/credential.repository.port';
-import { CredentialMikroOrmEntity } from './credential.mikroorm.entity';
+import { Credential } from '../../../domain/entities/credential.entity';
 import { CredentialMapper } from '../mappers/credential.mapper';
+import { CredentialMikroOrmEntity } from './credential.mikroorm.entity';
 
 @Injectable()
 export class CredentialPersistenceAdapter implements CredentialRepositoryPort {
@@ -15,9 +15,9 @@ export class CredentialPersistenceAdapter implements CredentialRepositoryPort {
     private readonly em: EntityManager,
   ) {}
 
-  async save(credential: Credential): Promise<Credential> {
+  save(credential: Credential): Credential {
     const ormEntity = CredentialMapper.toPersistence(credential);
-    await this.em.persistAndFlush(ormEntity);
+    this.em.persist(ormEntity);
     return CredentialMapper.toDomain(ormEntity);
   }
 

@@ -15,6 +15,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
         password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
         dbName: environmentService.get(EnvEnum.DATABASE_NAME),
         schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
+        registerRequestContext: true,
         autoLoadEntities: true,
         keepConnectionAlive: true,
         debug: environmentService.isDev(),

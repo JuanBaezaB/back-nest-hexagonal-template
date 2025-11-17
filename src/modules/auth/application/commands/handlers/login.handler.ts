@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto';
 import type { StringValue } from 'ms';
 import ms from 'ms';
 import { HashingPort } from 'src/shared/application/ports/out/hashing.port';
+import { UnitOfWorkPort } from 'src/shared/application/ports/out/unit-of-work.port';
 import { UuidPort } from 'src/shared/application/ports/out/uuid.port';
 import { RefreshTokenRepositoryPort } from '../../../application/ports/out/refresh-token.repository.port';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
@@ -27,46 +28,52 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly uuidPort: UuidPort,
     @Inject(AuthConfigPort)
     private readonly authConfigPort: AuthConfigPort,
+    @Inject(UnitOfWorkPort)
+    private readonly uow: UnitOfWorkPort,
   ) {}
 
   async execute(command: LoginCommand) {
     const { email, password } = command.loginDto;
 
-    const credential = await this.credentialRepository.findOneByEmail(email);
+    return this.uow.execute(async () => {
+      const credential = await this.credentialRepository.findOneByEmail(email);
 
-    if (!credential) throw new UnauthorizedException('Credenciales inválidas');
+      if (!credential)
+        throw new UnauthorizedException('Credenciales inválidas');
 
-    const isMatch = await this.hashingPort.compare(
-      password,
-      credential.passwordHash,
-    );
+      const isMatch = await this.hashingPort.compare(
+        password,
+        credential.passwordHash,
+      );
 
-    if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
+      if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
 
-    const payload = { sub: credential.id };
-    const accessToken = this.tokenPort.sign(payload);
+      const payload = { sub: credential.id };
+      const accessToken = this.tokenPort.sign(payload);
 
-    const selector = this.uuidPort.generate();
-    const validator = randomBytes(32).toString('hex');
-    const validatorHash = await this.hashingPort.hash(validator);
+      const selector = this.uuidPort.generate();
+      const validator = randomBytes(32).toString('hex');
+      const validatorHash = await this.hashingPort.hash(validator);
 
-    const expiresInString = this.authConfigPort.getJwtRefreshExpiration();
-    const expiresInMs = ms(expiresInString as StringValue);
-    const expiresAt = new Date(Date.now() + expiresInMs);
+      const expiresInString = this.authConfigPort.getJwtRefreshExpiration();
+      const expiresInMs = ms(expiresInString as StringValue);
+      const expiresAt = new Date(Date.now() + expiresInMs);
 
-    const tokenEntity = RefreshToken.create({
-      id: this.uuidPort.generate(),
-      userId: credential.id,
-      selector: selector,
-      validatorHash: validatorHash,
-      expiresAt: expiresAt,
+      const tokenEntity = RefreshToken.create({
+        id: this.uuidPort.generate(),
+        userId: credential.id,
+        selector: selector,
+        validatorHash: validatorHash,
+        expiresAt: expiresAt,
+      });
+
+      this.refreshTokenRepo.save(tokenEntity);
+
+      return {
+        accessToken,
+        refreshToken: `${selector}:${validator}`,
+        user: { id: credential.id },
+      };
     });
-    await this.refreshTokenRepo.save(tokenEntity);
-
-    return {
-      accessToken,
-      refreshToken: `${selector}:${validator}`,
-      user: { id: credential.id },
-    };
   }
 }
