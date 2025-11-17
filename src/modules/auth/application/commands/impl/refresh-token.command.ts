@@ -1,5 +1,5 @@
-import { RefreshTokenDto } from '../../ports/in/refresh-token.dto';
+import { RefreshTokenPort } from '../../ports/in/refresh-token.port';
 
 export class RefreshTokenCommand {
-  constructor(public readonly refreshTokenDto: RefreshTokenDto) {}
+  constructor(public readonly refreshTokenDto: RefreshTokenPort) {}
 }

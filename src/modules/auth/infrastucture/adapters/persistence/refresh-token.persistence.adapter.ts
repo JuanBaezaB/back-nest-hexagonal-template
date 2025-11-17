@@ -34,7 +34,7 @@ export class RefreshTokenPersistenceAdapter
       partial as RefreshToken,
     );
     this.em.assign(ormEntity, updatedEntity);
-    // await this.em.flush();
+
     return true;
   }
 }

@@ -37,7 +37,6 @@ export class UserPersistenceAdapter implements UserRepositoryPort {
     const partial = UserMapper.toPersistence(user);
 
     this.em.assign(ormEntity, partial);
-    await this.em.flush();
 
     return UserMapper.toDomain(ormEntity);
   }

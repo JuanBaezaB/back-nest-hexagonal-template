@@ -15,7 +15,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
 
   async execute(command: UpdateUserCommand) {
     return this.uow.execute(async () => {
-      const { id, updateUserDto } = command;
+      const { id, updateUserPort: updateUserDto } = command;
       const updatedUser = await this.userRepository.update(id, updateUserDto);
       if (!updatedUser) {
         throw new NotFoundException(`User with ID ${id} not found`);

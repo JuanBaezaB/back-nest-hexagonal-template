@@ -7,7 +7,7 @@ import { UserRepositoryPort } from './application/ports/out/user.repository.port
 import { QueryHandlers } from './application/queries/handlers';
 import { UserMikroOrmEntity } from './infrastructure/adapters/persistence/user.mikroorm.entity';
 import { UserPersistenceAdapter } from './infrastructure/adapters/persistence/user.persistence.adapter';
-import { UsersController } from './infrastructure/controllers/users.controller';
+import { UsersController } from './presentation/controllers/users.controller';
 
 export const UsersRepositoryProvider = {
   provide: UserRepositoryPort,

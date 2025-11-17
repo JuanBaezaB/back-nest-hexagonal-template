@@ -19,7 +19,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
   async execute(command: CreateUserCommand): Promise<User> {
     return this.uow.execute(async () => {
-      const { createUserDto } = command;
+      const { createUserPort: createUserDto } = command;
 
       const newUser = User.create({
         id: this.uuidPort.generate(),

@@ -15,7 +15,7 @@ import { CredentialMikroOrmEntity } from './infrastucture/adapters/persistence/c
 import { CredentialPersistenceAdapter } from './infrastucture/adapters/persistence/credential.persistence.adapter';
 import { RefreshTokenMikroOrmEntity } from './infrastucture/adapters/persistence/refresh-token.mikroorm.entity';
 import { RefreshTokenPersistenceAdapter } from './infrastucture/adapters/persistence/refresh-token.persistence.adapter';
-import { AuthController } from './infrastucture/controllers/auth.controller';
+import { AuthController } from './presentation/controllers/auth.controller';
 
 export const RefreshTokenRepositoryProvider = {
   provide: RefreshTokenRepositoryPort,

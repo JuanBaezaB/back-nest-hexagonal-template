@@ -1,5 +1,5 @@
-import { LoginDto } from '../../ports/in/login.dto';
+import { LoginPort } from '../../ports/in/login.port';
 
 export class LoginCommand {
-  constructor(public readonly loginDto: LoginDto) {}
+  constructor(public readonly loginPort: LoginPort) {}
 }

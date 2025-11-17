@@ -1,8 +1,8 @@
-import { UpdateUserDto } from '../../../application/ports/in/update-user.dto';
+import { UpdateUserPort } from '../../ports/in/update-user.port';
 
 export class UpdateUserCommand {
   constructor(
     public readonly id: string,
-    public readonly updateUserDto: UpdateUserDto,
+    public readonly updateUserPort: UpdateUserPort,
   ) {}
 }

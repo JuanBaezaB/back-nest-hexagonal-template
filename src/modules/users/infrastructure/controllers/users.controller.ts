@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -7,15 +6,9 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
-  Patch,
-  Post,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
 import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
-import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
-import { CreateUserDto } from '../../application/ports/in/create-user.dto';
-import { UpdateUserDto } from '../../application/ports/in/update-user.dto';
 import { GetAllUsersQuery } from '../../application/queries/impl/get-all-users.query';
 import { GetUserByIdQuery } from '../../application/queries/impl/get-user-by-id.query';
 
@@ -26,10 +19,10 @@ export class UsersController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @Post()
-  createUser(@Body() createUserDto: CreateUserDto) {
-    return this.commandBus.execute(new CreateUserCommand(createUserDto));
-  }
+  // @Post()
+  // createUser(@Body() createUserDto: CreateUserPort) {
+  //   return this.commandBus.execute(new CreateUserCommand(createUserDto));
+  // }
 
   @Get()
   getAllUsers() {
@@ -41,13 +34,13 @@ export class UsersController {
     return this.queryBus.execute(new GetUserByIdQuery(id));
   }
 
-  @Patch(':id')
-  updateUser(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.commandBus.execute(new UpdateUserCommand(id, updateUserDto));
-  }
+  // @Patch(':id')
+  // updateUser(
+  //   @Param('id', ParseUUIDPipe) id: string,
+  //   @Body() updateUserDto: UpdateUserPort,
+  // ) {
+  //   return this.commandBus.execute(new UpdateUserCommand(id, updateUserDto));
+  // }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

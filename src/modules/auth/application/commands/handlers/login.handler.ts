@@ -33,7 +33,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
   ) {}
 
   async execute(command: LoginCommand) {
-    const { email, password } = command.loginDto;
+    const { email, password } = command.loginPort;
 
     return this.uow.execute(async () => {
       const credential = await this.credentialRepository.findOneByEmail(email);

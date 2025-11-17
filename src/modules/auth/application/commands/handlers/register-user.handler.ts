@@ -34,7 +34,7 @@ export class RegisterUserHandler
     command: RegisterUserCommand,
   ): Promise<{ id: string; email: string }> {
     return this.uow.execute(async () => {
-      const { registerUserDto } = command;
+      const { registerUserPort: registerUserDto } = command;
 
       const existingCredential = await this.credentialRepository.findOneByEmail(
         registerUserDto.email,
