@@ -1,16 +1,16 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
-import helmet from 'helmet';
-import { EnvironmentService } from './common/environment/environment.service';
-import { LoggerService } from './common/logger/logger.service';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { EnvEnum } from './common/environment/enum/env.enum';
 import { MikroORM } from '@mikro-orm/postgresql';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { AppModule } from './app.module';
+import { EnvEnum } from './common/environment/enum/env.enum';
+import { EnvironmentService } from './common/environment/environment.service';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { LoggerService } from './common/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const environmentService = app.get<EnvironmentService>(EnvironmentService);
   const loggerService = app.get<LoggerService>(LoggerService);
@@ -43,6 +43,8 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, options);
     SwaggerModule.setup('api', app, document);
+  } else {
+    app.enableShutdownHooks();
   }
 
   await app.listen(environmentService.get(EnvEnum.PORT));

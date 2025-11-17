@@ -64,7 +64,7 @@ export class RefreshTokenHandler
 
       await this.refreshTokenRepo.update(storedToken.id, storedToken);
 
-      const newAccessToken = this.tokenPort.sign({ sub: userId });
+      const newAccessToken = await this.tokenPort.signAsync({ sub: userId });
 
       const newSelector = this.uuidPort.generate();
       const newValidator = randomBytes(32).toString('hex');

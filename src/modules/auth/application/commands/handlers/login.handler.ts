@@ -49,7 +49,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
 
       const payload = { sub: credential.id };
-      const accessToken = this.tokenPort.sign(payload);
+      const accessToken = await this.tokenPort.signAsync(payload);
 
       const selector = this.uuidPort.generate();
       const validator = randomBytes(32).toString('hex');
