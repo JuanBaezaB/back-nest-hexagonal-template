@@ -2,32 +2,35 @@ import { Injectable } from '@nestjs/common';
 import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
 import { createLogger, format, Logger } from 'winston';
 import { Console } from 'winston/lib/winston/transports';
-import { EnvironmentService } from '../environment/environment.service';
 import { EnvEnum } from '../environment/enum/env.enum';
+import { EnvironmentService } from '../environment/environment.service';
 
 @Injectable()
 export class LoggerService {
   private logger: Logger;
 
   constructor(environmentService: EnvironmentService) {
-    const { combine, timestamp, ms } = format;
+    const { combine, timestamp, ms, json } = format;
 
     const consoleTransport = new Console({
-      format: combine(
-        timestamp(),
-        ms(),
-        nestWinstonModuleUtilities.format.nestLike(
-          'v' + process.env.npm_package_version,
-          {
-            prettyPrint: true,
-          },
-        ),
-      ),
+      format: environmentService.isProd()
+        ? combine(timestamp(), json())
+        : combine(
+            timestamp(),
+            ms(),
+            nestWinstonModuleUtilities.format.nestLike(
+              'v' + process.env.npm_package_version,
+              {
+                prettyPrint: true,
+              },
+            ),
+          ),
     });
     const level: string = environmentService.get(EnvEnum.LOG_LEVEL);
     this.logger = createLogger({
       level: level,
       transports: [consoleTransport],
+      exitOnError: false,
     });
   }
 

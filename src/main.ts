@@ -27,6 +27,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      forbidNonWhitelisted: true,
       transformOptions: { enableImplicitConversion: true },
     }),
   );
@@ -34,7 +35,10 @@ async function bootstrap() {
   if (environmentService.isDev()) {
     const orm = app.get(MikroORM);
     const generator = orm.getSchemaGenerator();
-    await generator.updateSchema();
+    await generator.updateSchema({
+      safe: true,
+      dropTables: false,
+    });
 
     const options = new DocumentBuilder()
       .setTitle('API Documentation')
