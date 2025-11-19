@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { plainToInstance } from 'class-transformer';
+import { Transactional } from '../../../../shared/application/decorators/transactional.decorator';
 import { LoginCommand } from '../../application/commands/impl/login.command';
 import { RefreshTokenCommand } from '../../application/commands/impl/refresh-token.command';
 import { RegisterUserCommand } from '../../application/commands/impl/register-user.command';
@@ -25,6 +26,7 @@ export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Post('login')
+  @Transactional()
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     const result: LoginResponseDto = await this.commandBus.execute(
@@ -36,6 +38,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @Transactional()
   @HttpCode(HttpStatus.CREATED)
   async register(
     @Body() registerUserDto: RegisterUserDto,
@@ -49,6 +52,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Transactional()
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Body() refreshTokenDto: RefreshTokenDto,

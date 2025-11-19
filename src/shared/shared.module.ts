@@ -1,12 +1,12 @@
 // src/shared/shared.module.ts
 
 import { Global, Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HashingPort } from './application/ports/out/hashing.port';
-import { UnitOfWorkPort } from './application/ports/out/unit-of-work.port';
 import { UuidPort } from './application/ports/out/uuid.port';
 import { HashingAdapter } from './infrastructure/adapters/hashing.adapter';
-import { MikroOrmUnitOfWorkAdapter } from './infrastructure/adapters/mikroorm-unit-of-work.adapter';
 import { UuidAdapter } from './infrastructure/adapters/uuid.adapter';
+import { TransactionalInterceptor } from './infrastructure/interceptors/transactional.interceptor';
 
 const UuidProvider = {
   provide: UuidPort,
@@ -18,14 +18,14 @@ const HashingProvider = {
   useClass: HashingAdapter,
 };
 
-const UnitOfWorkProvider = {
-  provide: UnitOfWorkPort,
-  useClass: MikroOrmUnitOfWorkAdapter,
+const TransactionalInterceptorProvider = {
+  provide: APP_INTERCEPTOR,
+  useClass: TransactionalInterceptor,
 };
 
 @Global()
 @Module({
-  providers: [UuidProvider, HashingProvider, UnitOfWorkProvider],
-  exports: [UuidProvider, HashingProvider, UnitOfWorkProvider],
+  providers: [UuidProvider, HashingProvider, TransactionalInterceptorProvider],
+  exports: [UuidProvider, HashingProvider],
 })
 export class SharedModule {}

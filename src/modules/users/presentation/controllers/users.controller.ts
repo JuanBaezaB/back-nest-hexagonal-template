@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { plainToInstance } from 'class-transformer';
+import { Transactional } from '../../../../shared/application/decorators/transactional.decorator';
 import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
 import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
 import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
@@ -33,6 +34,7 @@ export class UsersController {
   ) {}
 
   @Post()
+  @Transactional()
   async createUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<UserResponseDto> {
@@ -63,6 +65,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Transactional()
   async updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -76,6 +79,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Transactional()
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.commandBus.execute(new DeleteUserCommand(id));
