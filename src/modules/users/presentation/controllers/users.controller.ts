@@ -12,15 +12,13 @@ import {
   Post,
   UseInterceptors,
 } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { plainToInstance } from 'class-transformer';
-import { Transactional } from '../../../../shared/application/decorators/transactional.decorator';
-import { CreateUserCommand } from '../../application/commands/impl/create-user.command';
-import { DeleteUserCommand } from '../../application/commands/impl/delete-user.command';
-import { UpdateUserCommand } from '../../application/commands/impl/update-user.command';
-import { GetAllUsersQuery } from '../../application/queries/impl/get-all-users.query';
-import { GetUserByIdQuery } from '../../application/queries/impl/get-user-by-id.query';
-import { User } from '../../domain/entities/user.entity';
+import { Transactional } from 'src/shared/application/decorators/transactional.decorator';
+import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
+import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
+import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case';
+import { GetUserByIdUseCase } from '../../application/use-cases/get-user-by-id.use-case';
+import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserResponseDto } from '../dto/user.response.dto';
@@ -29,18 +27,17 @@ import { UserResponseDto } from '../dto/user.response.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
+    private readonly createUserUseCase: CreateUserUseCase,
+    private readonly getAllUsersUseCase: GetAllUsersUseCase,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
   ) {}
 
   @Post()
   @Transactional()
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<UserResponseDto> {
-    const user: User = await this.commandBus.execute(
-      new CreateUserCommand(createUserDto),
-    );
+  async createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.createUserUseCase.execute(dto);
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
@@ -48,7 +45,7 @@ export class UsersController {
 
   @Get()
   async getAllUsers(): Promise<UserResponseDto[]> {
-    const users: User[] = await this.queryBus.execute(new GetAllUsersQuery());
+    const users = await this.getAllUsersUseCase.execute();
     return plainToInstance(UserResponseDto, users, {
       excludeExtraneousValues: true,
     });
@@ -58,7 +55,7 @@ export class UsersController {
   async getUserById(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<UserResponseDto> {
-    const user: User = await this.queryBus.execute(new GetUserByIdQuery(id));
+    const user = await this.getUserByIdUseCase.execute(id);
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
@@ -68,11 +65,9 @@ export class UsersController {
   @Transactional()
   async updateUser(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() dto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    const user: User = await this.commandBus.execute(
-      new UpdateUserCommand(id, updateUserDto),
-    );
+    const user = await this.updateUserUseCase.execute(id, dto);
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
@@ -81,7 +76,7 @@ export class UsersController {
   @Delete(':id')
   @Transactional()
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    return this.commandBus.execute(new DeleteUserCommand(id));
+  async deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.deleteUserUseCase.execute(id);
   }
 }
