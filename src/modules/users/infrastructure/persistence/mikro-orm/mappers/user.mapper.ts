@@ -1,7 +1,6 @@
-import { User } from '../../../domain/entities/user.entity';
-import { UserMikroOrmEntity } from '../persistence/user.mikroorm.entity';
+import { User } from '../../../../domain/entities/user.entity';
+import { UserMikroOrmEntity } from '../entities/user.entity';
 
-// Clase estática para mapear entre el dominio y la persistencia
 export class UserMapper {
   public static toDomain(ormEntity: UserMikroOrmEntity): User {
     return User.fromPersistence({

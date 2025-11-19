@@ -1,13 +1,13 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
+import { UserRepositoryPort } from 'src/modules/users/application/ports/out/user.repository.port';
 import { User } from 'src/modules/users/domain/entities/user.entity';
-import { UserRepositoryPort } from '../../../application/ports/out/user.repository.port';
+import { UserMikroOrmEntity } from '../entities/user.entity';
 import { UserMapper } from '../mappers/user.mapper';
-import { UserMikroOrmEntity } from './user.mikroorm.entity';
 
 @Injectable()
-export class UserPersistenceAdapter implements UserRepositoryPort {
+export class MikroOrmUserRepository implements UserRepositoryPort {
   constructor(
     @InjectRepository(UserMikroOrmEntity)
     private readonly userOrmRepository: EntityRepository<UserMikroOrmEntity>,
