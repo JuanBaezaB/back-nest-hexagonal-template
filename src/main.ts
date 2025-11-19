@@ -1,8 +1,8 @@
-import { MikroORM } from '@mikro-orm/postgresql';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 import { AppModule } from './app.module';
 import { EnvEnum } from './common/environment/enum/env.enum';
 import { EnvironmentService } from './common/environment/environment.service';
@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggerService } from './common/logger/logger.service';
 
 async function bootstrap() {
+  initializeTransactionalContext();
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const environmentService = app.get<EnvironmentService>(EnvironmentService);
@@ -33,12 +34,12 @@ async function bootstrap() {
   );
 
   if (environmentService.isDev()) {
-    const orm = app.get(MikroORM);
-    const generator = orm.getSchemaGenerator();
-    await generator.updateSchema({
-      safe: true,
-      dropTables: false,
-    });
+    // const orm = app.get(MikroORM);
+    // const generator = orm.getSchemaGenerator();
+    // await generator.updateSchema({
+    //   safe: true,
+    //   dropTables: false,
+    // });
 
     const options = new DocumentBuilder()
       .setTitle('API Documentation')

@@ -1,35 +1,36 @@
 import { Module } from '@nestjs/common';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { EnvironmentService } from '../environment/environment.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 import { EnvEnum } from '../environment/enum/env.enum';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-
+import { EnvironmentService } from '../environment/environment.service';
 @Module({
   imports: [
-    MikroOrmModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       useFactory: (environmentService: EnvironmentService) => ({
-        driver: PostgreSqlDriver,
+        type: 'postgres',
         host: environmentService.get(EnvEnum.DATABASE_HOST),
         port: environmentService.get(EnvEnum.DATABASE_PORT),
-        user: environmentService.get(EnvEnum.DATABASE_USER),
+        username: environmentService.get(EnvEnum.DATABASE_USER),
         password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
-        dbName: environmentService.get(EnvEnum.DATABASE_NAME),
+        database: environmentService.get(EnvEnum.DATABASE_NAME),
         schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
-        registerRequestContext: true,
         autoLoadEntities: true,
-        keepConnectionAlive: true,
-        debug: environmentService.isDev(),
-        driverOptions: {
-          connection: {
-            ssl: {
-              require: true,
-              rejectUnauthorized: false,
-            },
-          },
+        synchronize: environmentService.isDev(), // Solo en desarrollo
+        logging: environmentService.isDev(),
+        ssl: {
+          rejectUnauthorized: false,
         },
       }),
+      dataSourceFactory: async (options) => {
+        if (!options) {
+          throw new Error('Invalid options passed');
+        }
+        return Promise.resolve(
+          addTransactionalDataSource(new DataSource(options)),
+        );
+      },
       inject: [EnvironmentService],
-      driver: PostgreSqlDriver,
     }),
   ],
 })

@@ -1,35 +1,39 @@
-import { EntityManager } from '@mikro-orm/postgresql';
 import {
   CallHandler,
   ExecutionContext,
+  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, from, lastValueFrom } from 'rxjs';
-import { TRANSACTIONAL_KEY } from '../../application/decorators/transactional.decorator';
+import {
+  TRANSACTIONAL_KEY,
+  TransactionOptions,
+} from '../../application/decorators/transactional.decorator';
+import { TransactionManagerPort } from '../../application/ports/out/transaction-manager.port';
 
 @Injectable()
 export class TransactionalInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    private readonly em: EntityManager,
+    @Inject(TransactionManagerPort)
+    private readonly transactionManager: TransactionManagerPort,
   ) {}
 
   intercept<T>(context: ExecutionContext, next: CallHandler<T>): Observable<T> {
-    const isTransactional = this.reflector.getAllAndOverride<boolean>(
-      TRANSACTIONAL_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const options = this.reflector.getAllAndOverride<
+      TransactionOptions | boolean
+    >(TRANSACTIONAL_KEY, [context.getHandler(), context.getClass()]);
 
-    if (!isTransactional) {
+    if (!options) {
       return next.handle();
     }
 
     return from(
-      this.em.transactional(async () => {
+      this.transactionManager.runInTransaction(async () => {
         return await lastValueFrom(next.handle());
-      }),
+      }, options),
     );
   }
 }

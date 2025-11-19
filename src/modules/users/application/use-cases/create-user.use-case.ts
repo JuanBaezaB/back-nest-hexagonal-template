@@ -18,6 +18,6 @@ export class CreateUserUseCase {
       id: this.uuidPort.generate(),
       name: dto.name,
     });
-    return Promise.resolve(this.userRepository.save(newUser));
+    return this.userRepository.save(newUser);
   }
 }
