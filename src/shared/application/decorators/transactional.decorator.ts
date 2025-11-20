@@ -1,15 +1,20 @@
+// src/shared/application/decorators/transactional.decorator.ts
 import { SetMetadata } from '@nestjs/common';
+import { ConnectionName } from '../../domain/enums/connection-name.enum';
 
-export const TRANSACTIONAL_KEY = 'IS_TRANSACTIONAL';
+export const TRANSACTIONAL_KEY = 'TRANSACTIONAL_KEY';
 
-// Opciones genéricas (aisladas de TypeORM)
-export interface TransactionOptions {
-  isolationLevel?:
-    | 'READ UNCOMMITTED'
-    | 'READ COMMITTED'
-    | 'REPEATABLE READ'
-    | 'SERIALIZABLE';
+export interface TransactionMetadata {
+  connectionName: ConnectionName;
+  timeout?: number;
+  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
 }
 
-export const Transactional = (options?: TransactionOptions) =>
-  SetMetadata(TRANSACTIONAL_KEY, options || true);
+export const Transactional = (
+  connectionName: ConnectionName = ConnectionName.DEFAULT,
+  options?: Omit<TransactionMetadata, 'connectionName'>
+): MethodDecorator =>
+  SetMetadata(TRANSACTIONAL_KEY, {
+    connectionName,
+    ...options,
+  } as TransactionMetadata);

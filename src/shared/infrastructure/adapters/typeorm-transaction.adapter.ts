@@ -4,9 +4,7 @@ import { TransactionManagerPort } from '../../application/ports/out/transaction-
 
 @Injectable()
 export class TypeOrmTransactionAdapter implements TransactionManagerPort {
-  async runInTransaction<T>(fn: () => Promise<T>): Promise<T> {
-    return runInTransaction(async () => {
-      return await fn();
-    });
+  runInTransaction<T>(fn: () => Promise<T>): Promise<T> {
+    return runInTransaction(fn);
   }
 }

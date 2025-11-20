@@ -2,10 +2,11 @@
 
 import { Global, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TransactionManagerPort } from './application/ports/out/transaction-manager.port';
 import { UuidPort } from './application/ports/out/uuid.port';
+import { MikroOrmTransactionAdapter } from './infrastructure/adapters/mikroorm-transaction.adapter';
 import { TypeOrmTransactionAdapter } from './infrastructure/adapters/typeorm-transaction.adapter';
 import { UuidAdapter } from './infrastructure/adapters/uuid.adapter';
+import { TransactionManagerFactory } from './infrastructure/factories/transaction-manager.factory';
 import { TransactionalInterceptor } from './infrastructure/interceptors/transactional.interceptor';
 
 const UuidProvider = {
@@ -13,9 +14,14 @@ const UuidProvider = {
   useClass: UuidAdapter,
 };
 
-const TransactionManagerProvider = {
-  provide: TransactionManagerPort,
+const TypeOrmTransactionProvider = {
+  provide: 'TypeOrmAdapter',
   useClass: TypeOrmTransactionAdapter,
+};
+
+const MikroOrmTransactionProvider = {
+  provide: 'MikroOrmAdapter',
+  useClass: MikroOrmTransactionAdapter,
 };
 
 // Proveedor del Interceptor Global
@@ -28,9 +34,20 @@ const TransactionalInterceptorProvider = {
 @Module({
   providers: [
     UuidProvider,
-    TransactionManagerProvider,
-    TransactionalInterceptorProvider,
+    TransactionManagerFactory,
+    {
+      provide: 'TypeOrmAdapter',
+      useClass: TypeOrmTransactionAdapter,
+    },
+    {
+      provide: 'MikroOrmAdapter',
+      useClass: MikroOrmTransactionAdapter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransactionalInterceptor,
+    },
   ],
-  exports: [UuidProvider, TransactionManagerPort],
+  exports: [UuidProvider],
 })
-export class SharedModule {}
+export class SharedModule { }

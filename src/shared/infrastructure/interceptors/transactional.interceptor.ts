@@ -1,39 +1,42 @@
+// src/shared/infrastructure/interceptors/transactional.interceptor.ts
 import {
   CallHandler,
   ExecutionContext,
-  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, from, lastValueFrom } from 'rxjs';
-import {
-  TRANSACTIONAL_KEY,
-  TransactionOptions,
-} from '../../application/decorators/transactional.decorator';
-import { TransactionManagerPort } from '../../application/ports/out/transaction-manager.port';
+import { TRANSACTIONAL_KEY, TransactionMetadata } from '../../application/decorators/transactional.decorator';
+import { TransactionManagerFactory } from '../factories/transaction-manager.factory';
 
 @Injectable()
 export class TransactionalInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
-    @Inject(TransactionManagerPort)
-    private readonly transactionManager: TransactionManagerPort,
-  ) {}
+    private readonly txFactory: TransactionManagerFactory,
+  ) { }
 
-  intercept<T>(context: ExecutionContext, next: CallHandler<T>): Observable<T> {
-    const options = this.reflector.getAllAndOverride<
-      TransactionOptions | boolean
-    >(TRANSACTIONAL_KEY, [context.getHandler(), context.getClass()]);
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // 1. Extrae los metadatos del decorador
+    const metadata = this.reflector.getAllAndOverride<TransactionMetadata>(
+      TRANSACTIONAL_KEY,
+      [context.getHandler(), context.getClass()]
+    );
 
-    if (!options) {
+    // 2. Si no hay decorador, pasa directo
+    if (!metadata) {
       return next.handle();
     }
 
+    // 3. Obtiene el manager correcto por nombre lógico
+    const manager = this.txFactory.getManager(metadata.connectionName);
+
+    // 4. Ejecuta dentro de la transacción
     return from(
-      this.transactionManager.runInTransaction(async () => {
+      manager.runInTransaction(async () => {
         return await lastValueFrom(next.handle());
-      }, options),
+      }),
     );
   }
 }
