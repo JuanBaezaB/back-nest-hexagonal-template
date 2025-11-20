@@ -12,12 +12,12 @@ import { EnvironmentService } from '../environment/environment.service';
     TypeOrmModule.forRootAsync({
       useFactory: (environmentService: EnvironmentService) => ({
         type: 'postgres',
-        host: environmentService.get(EnvEnum.DATABASE_HOST),
-        port: environmentService.get(EnvEnum.DATABASE_PORT),
-        username: environmentService.get(EnvEnum.DATABASE_USER),
-        password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
-        database: environmentService.get(EnvEnum.DATABASE_NAME),
-        schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
+        host: environmentService.get(EnvEnum.USERS_DATABASE_HOST),
+        port: environmentService.get(EnvEnum.USERS_DATABASE_PORT),
+        username: environmentService.get(EnvEnum.USERS_DATABASE_USER),
+        password: environmentService.get(EnvEnum.USERS_DATABASE_PASSWORD),
+        database: environmentService.get(EnvEnum.USERS_DATABASE_NAME),
+        schema: environmentService.get(EnvEnum.USERS_DATABASE_SCHEMA),
         autoLoadEntities: true,
         synchronize: environmentService.isDev(), // Solo en desarrollo
         logging: environmentService.isDev(),
@@ -39,12 +39,12 @@ import { EnvironmentService } from '../environment/environment.service';
     MikroOrmModule.forRootAsync({
       useFactory: (environmentService: EnvironmentService) => ({
         driver: PostgreSqlDriver,
-        host: environmentService.get(EnvEnum.DATABASE_HOST),
-        port: environmentService.get(EnvEnum.DATABASE_PORT),
-        user: environmentService.get(EnvEnum.DATABASE_USER),
-        password: environmentService.get(EnvEnum.DATABASE_PASSWORD),
-        dbName: environmentService.get(EnvEnum.DATABASE_NAME),
-        schema: environmentService.get(EnvEnum.DATABASE_SCHEMA),
+        host: environmentService.get(EnvEnum.TASKS_DATABASE_HOST),
+        port: environmentService.get(EnvEnum.TASKS_DATABASE_PORT),
+        user: environmentService.get(EnvEnum.TASKS_DATABASE_USER),
+        password: environmentService.get(EnvEnum.TASKS_DATABASE_PASSWORD),
+        dbName: environmentService.get(EnvEnum.TASKS_DATABASE_NAME),
+        schema: environmentService.get(EnvEnum.TASKS_DATABASE_SCHEMA),
         registerRequestContext: true,
         autoLoadEntities: true,
         keepConnectionAlive: true,

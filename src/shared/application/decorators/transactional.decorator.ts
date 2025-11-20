@@ -7,12 +7,16 @@ export const TRANSACTIONAL_KEY = 'TRANSACTIONAL_KEY';
 export interface TransactionMetadata {
   connectionName: ConnectionName;
   timeout?: number;
-  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  isolationLevel?:
+    | 'READ_UNCOMMITTED'
+    | 'READ_COMMITTED'
+    | 'REPEATABLE_READ'
+    | 'SERIALIZABLE';
 }
 
 export const Transactional = (
-  connectionName: ConnectionName = ConnectionName.DEFAULT,
-  options?: Omit<TransactionMetadata, 'connectionName'>
+  connectionName: ConnectionName,
+  options?: Omit<TransactionMetadata, 'connectionName'>,
 ): MethodDecorator =>
   SetMetadata(TRANSACTIONAL_KEY, {
     connectionName,

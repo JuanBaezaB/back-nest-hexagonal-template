@@ -14,22 +14,6 @@ const UuidProvider = {
   useClass: UuidAdapter,
 };
 
-const TypeOrmTransactionProvider = {
-  provide: 'TypeOrmAdapter',
-  useClass: TypeOrmTransactionAdapter,
-};
-
-const MikroOrmTransactionProvider = {
-  provide: 'MikroOrmAdapter',
-  useClass: MikroOrmTransactionAdapter,
-};
-
-// Proveedor del Interceptor Global
-const TransactionalInterceptorProvider = {
-  provide: APP_INTERCEPTOR,
-  useClass: TransactionalInterceptor,
-};
-
 @Global()
 @Module({
   providers: [
@@ -50,4 +34,4 @@ const TransactionalInterceptorProvider = {
   ],
   exports: [UuidProvider],
 })
-export class SharedModule { }
+export class SharedModule {}

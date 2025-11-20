@@ -1,3 +1,4 @@
+import { MikroORM } from '@mikro-orm/postgresql';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -34,12 +35,12 @@ async function bootstrap() {
   );
 
   if (environmentService.isDev()) {
-    // const orm = app.get(MikroORM);
-    // const generator = orm.getSchemaGenerator();
-    // await generator.updateSchema({
-    //   safe: true,
-    //   dropTables: false,
-    // });
+    const orm = app.get(MikroORM);
+    const generator = orm.getSchemaGenerator();
+    await generator.updateSchema({
+      safe: true,
+      dropTables: false,
+    });
 
     const options = new DocumentBuilder()
       .setTitle('API Documentation')

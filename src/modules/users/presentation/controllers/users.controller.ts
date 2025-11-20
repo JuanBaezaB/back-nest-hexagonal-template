@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Transactional } from 'src/shared/application/decorators/transactional.decorator';
+import { ConnectionName } from 'src/shared/domain/enums/connection-name.enum';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
 import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
 import { GetAllUsersUseCase } from '../../application/use-cases/get-all-users.use-case';
@@ -35,7 +36,7 @@ export class UsersController {
   ) {}
 
   @Post()
-  @Transactional()
+  @Transactional(ConnectionName.USERS)
   async createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const user = await this.createUserUseCase.execute(dto);
     return plainToInstance(UserResponseDto, user, {
@@ -62,7 +63,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Transactional()
+  @Transactional(ConnectionName.USERS)
   async updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUserDto,
@@ -74,7 +75,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Transactional()
+  @Transactional(ConnectionName.USERS)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteUserUseCase.execute(id);

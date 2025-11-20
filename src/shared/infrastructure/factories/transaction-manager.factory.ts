@@ -13,8 +13,8 @@ export class TransactionManagerFactory {
   ) {
     // Mapea nombres lógicos a implementaciones
     this.managers = new Map([
-      [ConnectionName.DEFAULT, this.typeOrmAdapter],
-      [ConnectionName.ANALYTICS, this.mikroOrmAdapter],
+      [ConnectionName.USERS, this.typeOrmAdapter],
+      [ConnectionName.TASKS, this.mikroOrmAdapter],
     ]);
   }
 
@@ -29,7 +29,7 @@ export class TransactionManagerFactory {
 
     if (!manager) {
       throw new BadRequestException(
-        `Transaction manager for connection "${connectionName}" not found`
+        `Transaction manager for connection "${connectionName}" not found`,
       );
     }
 

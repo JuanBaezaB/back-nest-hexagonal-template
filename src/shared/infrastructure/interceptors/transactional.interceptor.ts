@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, from, lastValueFrom } from 'rxjs';
-import { TRANSACTIONAL_KEY, TransactionMetadata } from '../../application/decorators/transactional.decorator';
+import {
+  TRANSACTIONAL_KEY,
+  TransactionMetadata,
+} from '../../application/decorators/transactional.decorator';
 import { TransactionManagerFactory } from '../factories/transaction-manager.factory';
 
 @Injectable()
@@ -15,13 +18,13 @@ export class TransactionalInterceptor implements NestInterceptor {
   constructor(
     private readonly reflector: Reflector,
     private readonly txFactory: TransactionManagerFactory,
-  ) { }
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // 1. Extrae los metadatos del decorador
     const metadata = this.reflector.getAllAndOverride<TransactionMetadata>(
       TRANSACTIONAL_KEY,
-      [context.getHandler(), context.getClass()]
+      [context.getHandler(), context.getClass()],
     );
 
     // 2. Si no hay decorador, pasa directo
