@@ -1,3 +1,4 @@
+import { getMikroORMToken } from '@mikro-orm/nestjs';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -35,7 +36,7 @@ async function bootstrap() {
   );
 
   if (environmentService.isDev()) {
-    const orm = app.get(MikroORM);
+    const orm = app.get<MikroORM>(getMikroORMToken('tasks'));
     const generator = orm.getSchemaGenerator();
     await generator.updateSchema({
       safe: true,

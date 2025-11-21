@@ -59,7 +59,7 @@ export class TasksController {
   }
 
   @Delete(':id')
-  @Transactional(ConnectionName.USERS)
+  @Transactional(ConnectionName.TASKS)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTask(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.deleteTaskUseCase.execute(id);

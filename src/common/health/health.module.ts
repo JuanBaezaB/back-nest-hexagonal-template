@@ -1,10 +1,9 @@
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthController } from './health.controller';
 
 @Module({
-  imports: [TerminusModule, MikroOrmModule],
+  imports: [TerminusModule],
   controllers: [HealthController],
 })
 export class HealthModule {}

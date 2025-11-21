@@ -12,7 +12,7 @@ export const UsersRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserTypeOrmEntity])],
+  imports: [TypeOrmModule.forFeature([UserTypeOrmEntity], 'users')],
   controllers: [UsersController],
   providers: [...UserUseCases, UsersRepositoryProvider],
 })

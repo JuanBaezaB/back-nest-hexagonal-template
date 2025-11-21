@@ -10,6 +10,7 @@ import { EnvironmentService } from '../environment/environment.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      name: 'users',
       useFactory: (environmentService: EnvironmentService) => ({
         type: 'postgres',
         host: environmentService.get(EnvEnum.USERS_DATABASE_HOST),
@@ -37,6 +38,7 @@ import { EnvironmentService } from '../environment/environment.service';
     }),
 
     MikroOrmModule.forRootAsync({
+      contextName: 'tasks',
       useFactory: (environmentService: EnvironmentService) => ({
         driver: PostgreSqlDriver,
         host: environmentService.get(EnvEnum.TASKS_DATABASE_HOST),
@@ -63,5 +65,6 @@ import { EnvironmentService } from '../environment/environment.service';
       driver: PostgreSqlDriver,
     }),
   ],
+  exports: [MikroOrmModule],
 })
 export class DatabaseModule {}

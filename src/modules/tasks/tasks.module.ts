@@ -12,7 +12,7 @@ export const TaskRepositoryProvider = {
 };
 
 @Module({
-  imports: [MikroOrmModule.forFeature([TaskMikroOrmEntity])],
+  imports: [MikroOrmModule.forFeature([TaskMikroOrmEntity], 'tasks')],
   controllers: [TasksController],
   providers: [...TaskUseCases, TaskRepositoryProvider],
 })

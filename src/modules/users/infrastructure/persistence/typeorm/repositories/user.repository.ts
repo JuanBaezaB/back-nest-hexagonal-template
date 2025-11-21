@@ -9,7 +9,7 @@ import { UserMapper } from '../mappers/user.mapper';
 @Injectable()
 export class TypeOrmUserRepository implements UserRepositoryPort {
   constructor(
-    @InjectRepository(UserTypeOrmEntity)
+    @InjectRepository(UserTypeOrmEntity, 'users')
     private readonly repository: Repository<UserTypeOrmEntity>,
   ) {}
 

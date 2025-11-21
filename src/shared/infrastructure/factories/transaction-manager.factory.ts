@@ -8,13 +8,14 @@ export class TransactionManagerFactory {
   private readonly managers: Map<ConnectionName, TransactionManagerPort>;
 
   constructor(
-    @Inject('TypeOrmAdapter') private typeOrmAdapter: TransactionManagerPort,
-    @Inject('MikroOrmAdapter') private mikroOrmAdapter: TransactionManagerPort,
+    @Inject('UsersTypeOrmAdapter') private usersAdapter: TransactionManagerPort,
+    @Inject('TasksMikroOrmAdapter')
+    private tasksAdapter: TransactionManagerPort,
   ) {
     // Mapea nombres lógicos a implementaciones
     this.managers = new Map([
-      [ConnectionName.USERS, this.typeOrmAdapter],
-      [ConnectionName.TASKS, this.mikroOrmAdapter],
+      [ConnectionName.USERS, this.usersAdapter],
+      [ConnectionName.TASKS, this.tasksAdapter],
     ]);
   }
 

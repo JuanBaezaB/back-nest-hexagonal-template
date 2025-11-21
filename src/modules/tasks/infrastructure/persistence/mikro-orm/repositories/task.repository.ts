@@ -1,7 +1,6 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { InjectEntityManager, InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-
 import { Task } from 'src/modules/tasks/domain/task.entity';
 import { TaskRepositoryPort } from '../../../../application/ports/out/task.repository.port';
 import { TaskMikroOrmEntity } from '../entities/task.entity';
@@ -10,8 +9,9 @@ import { TaskMapper } from '../mappers/task.mapper';
 @Injectable()
 export class MikroOrmTaskRepository implements TaskRepositoryPort {
   constructor(
-    @InjectRepository(TaskMikroOrmEntity)
+    @InjectRepository(TaskMikroOrmEntity, 'tasks')
     private readonly taskOrmRepository: EntityRepository<TaskMikroOrmEntity>,
+    @InjectEntityManager('tasks')
     private readonly em: EntityManager,
   ) {}
 
